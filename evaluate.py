@@ -2,7 +2,7 @@
 # File: evaluate.py
 # Name: Omar Abdallah
 # Class: AA 222 / CS 361
-# Project: MESC Wing-Box Evaluation (camelCase style)
+# Project: MESC Wing-Box
 #
 
 import numpy as np
