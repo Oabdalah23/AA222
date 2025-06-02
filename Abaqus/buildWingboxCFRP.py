@@ -2,7 +2,7 @@
 # File: buildWingboxShell.py
 # Name: Omar Abdallah
 # Class: AA 222 / CS 361
-# Project: MESC Wing-Box Optimization
+# Project: MESC Wing-Box
 # Note: Attempted to Construct Abaqus High Fidelity Model
 #
 
