@@ -10,9 +10,6 @@ from abaqus import mdb, session
 from abaqusConstants import *
 import mesh, regionToolset
 
-# ------------------------------------------------------------
-# 0  Parameters (JSON override optional)
-# ------------------------------------------------------------
 par = dict(L=1.50, b=0.30, h=0.40, t_skin=3.0e-3, seed=0.10)
 if len(sys.argv) > 2 and sys.argv[1] == '--':
     par.update(json.load(open(sys.argv[2])))
@@ -23,18 +20,12 @@ seed_size = par['seed']
 job_name  = 'wingbox_shell'
 EPS       = 1e-6                      # geometric tolerance
 
-# ------------------------------------------------------------
-# 1  Model & shell geometry
-# ------------------------------------------------------------
 model = mdb.Model(name='Wingbox')
 sk    = model.ConstrainedSketch(name='xsec', sheetSize=1.0)
 sk.rectangle((0., 0.), (b, h))
 part  = model.Part(name='WB', dimensionality=THREE_D, type=DEFORMABLE_BODY)
 part.BaseShellExtrude(sketch=sk, depth=L)
 
-# ------------------------------------------------------------
-# 2  Material & shell section (isotropic placeholder)
-# ------------------------------------------------------------
 mat = model.Material(name='CFRP_iso')
 mat.Density(table=((1600.,),))
 mat.Elastic(table=((135e9, 0.30),))
@@ -42,9 +33,6 @@ model.HomogeneousShellSection(name='Skin', material='CFRP_iso', thickness=t_skin
 faces_all = regionToolset.Region(faces=part.faces)
 part.SectionAssignment(region=faces_all, sectionName='Skin')
 
-# ------------------------------------------------------------
-# 3  Assembly, boundary sets
-# ------------------------------------------------------------
 asm  = model.rootAssembly
 inst = asm.Instance(name='WBinst', part=part, dependent=ON)
 
@@ -67,37 +55,22 @@ model.Coupling(name='CoupTop', controlPoint=asm.sets['SET_RP'],
                surface=asm.surfaces['TopSurf'], couplingType=KINEMATIC,
                influenceRadius=WHOLE_SURFACE)
 
-# ------------------------------------------------------------
-# 4  Step & load
-# ------------------------------------------------------------
 model.StaticStep(name='BEND', previous='Initial')
 M_unit = 1.0e4                       # 10 kN·m
 model.Moment(name='UnitM', createStepName='BEND', region=asm.sets['SET_RP'], cm1=M_unit)
 
-# ------------------------------------------------------------
-# 5  Meshing
-# ------------------------------------------------------------
 part.seedPart(size=seed_size)
 part.setElementType(regions=faces_all, elemTypes=(mesh.ElemType(elemCode=S4R, elemLibrary=STANDARD),))
 part.generateMesh()
 
-# ------------------------------------------------------------
-# ------------------------------------------------------------
-# 6  Compute mass (pre‑solve) & Job
-# ------------------------------------------------------------
-# getMassProperties on the Assembly works before the job runs
 mass = asm.getMassProperties()['mass']
 
 job = mdb.Job(name=job_name, model='Wingbox')
 job.submit(); job.waitForCompletion()
 
-# ------------------------------------------------------------
 job = mdb.Job(name=job_name, model='Wingbox')
 job.submit(); job.waitForCompletion()
 
-# ------------------------------------------------------------
-# 7  Post‑processing
-# ------------------------------------------------------------
 from odbAccess import openOdb
 odb   = openOdb(job_name + '.odb')
 frame = odb.steps['BEND'].frames[-1]
