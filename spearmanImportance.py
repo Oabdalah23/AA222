@@ -2,7 +2,7 @@
 # File: spearmanImportance.py
 # Name: Omar Abdallah
 # Class: AA 222 / CS 361
-# Project: MESC Wing-Box Spearman Importance
+# Project: MESC Wing-Box
 #
 
 import pandas as pd
