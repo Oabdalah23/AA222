@@ -2,7 +2,7 @@
 # File: postGp.py
 # Name: Omar Abdallah
 # Class: AA 222 / CS 361
-# Project: MESC Wing-Box GP Fitting
+# Project: MESC Wing-Box
 #
 
 import pandas as pd
